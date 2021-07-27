@@ -128,16 +128,16 @@ class missions():
                     cv2.line(frame,(cx,cy),(320,220),(255,0,0),1)
                     aci = math.atan(cx/cy)                
                     self.set_ground_course(math.degrees(aci),10)
-                    if (cx >320 ):
+                   """ if (cx >320 ):
                         aci=math.atan((cx-320)/(480-cy))
                         print("Ucagin kordinatlari: %d %d " %(self.aurornis.pos_lat,self.aurornis.pos_lon))
                         #print("Hedefin kordinatlari: %d %d " %(aurornis.pos_))
                         self.set_ground_course(math.degrees(aci),self.aurornis.pos_alt_rel)
                     elif(cx < 320  ):
-                         aci=math.atan((320-cx)/(480-cy))
+                         aci=math.atan((cx-320)/(480-cy))
                          #print(360-math.degrees(aci))
                          self.set_ground_course(360-math.degrees(aci),self.aurornis.pos_alt_rel)
-
+"""
                     if(cx >= 320-radius and cx <= 320+radius and cy >= 220-radius and cy <= 220+radius):
                         print("Hedef Tam Ortada!!!")
                         print(self.aurornis.pos_lat,self.aurornis.pos_lon,self.aurornis.pos_alt_rel) 
@@ -146,7 +146,11 @@ class missions():
                         boylam=self.aurornis.pos_lon
                         yukseklik=self.aurornis.pos_alt_rel
                         #kordinatlar_alindi_mi=True
-            
+                    else:
+                        aci=math.degrees(math.atan((cx-320)/(480-cy)))
+                        hedef_yaw=aci+plane.att_heading_deg  
+                        self.set_ground_course(hedef_yaw,self.aurornis.pos_alt_rel)
+                        
             #cv2.imshow("Mask", mask)
             #cv2.imshow("Frame", frame)
             if (cv2.waitKey(15) & 0xFF == ord('q') or kordinatlar_alindi_mi==True) :
