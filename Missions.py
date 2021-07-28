@@ -138,6 +138,10 @@ class missions():
                          #print(360-math.degrees(aci))
                          self.set_ground_course(360-math.degrees(aci),self.aurornis.pos_alt_rel)
 """
+                    aci=math.degrees(math.atan((cx-320)/(480-cy)))
+                    hedef_yaw=aci+plane.att_heading_deg  
+                    self.set_ground_course(hedef_yaw,self.aurornis.pos_alt_rel)
+                        
                     if(cx >= 320-radius and cx <= 320+radius and cy >= 220-radius and cy <= 220+radius):
                         print("Hedef Tam Ortada!!!")
                         print(self.aurornis.pos_lat,self.aurornis.pos_lon,self.aurornis.pos_alt_rel) 
@@ -146,10 +150,8 @@ class missions():
                         boylam=self.aurornis.pos_lon
                         yukseklik=self.aurornis.pos_alt_rel
                         #kordinatlar_alindi_mi=True
-                    else:
-                        aci=math.degrees(math.atan((cx-320)/(480-cy)))
-                        hedef_yaw=aci+plane.att_heading_deg  
-                        self.set_ground_course(hedef_yaw,self.aurornis.pos_alt_rel)
+                    
+                        
                         
             #cv2.imshow("Mask", mask)
             #cv2.imshow("Frame", frame)
