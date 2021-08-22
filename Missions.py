@@ -3,7 +3,6 @@ Kirmiziyi gordugu an gpsini kaydediyor , kordinatlar_alindi_mi True oldugu zaman
 
 """
 
-
 from Aurornis import aurornis
 from pymavlink import mavutil
 from scipy.spatial import distance as dist
@@ -20,14 +19,21 @@ import copy
 
 import cv2
 
+dispW=640
+dispH=480
+flip=2 
+
+camSet='nvarguscamerasrc !  video/x-raw(memory:NVMM), width= 640 , height= 480 , format=NV12, framerate=20/1 ! nvvidconv flip-method='+str(flip)+' ! video/x-raw, width='+str(dispW)+', height='+str(dispH)+', format=BGRx ! videoconvert ! video/x-raw, format=BGR ! appsink'
+
 cap = cv2.VideoCapture(0) # SJCAM Kamerada 0 degil 1 olabilir deneyin
 
 #KAMERA KALIBRASYONU
-
+"""
 DIM=(1280, 720)
 K=np.array([[796.2152689047866, 0.0, 666.7474094441768], [0.0, 802.2658823670218, 379.81656819013784], [0.0, 0.0, 1.0]])
 D=np.array([[-0.02544263874037485], [-0.08730606939161767], [0.2367713210309387], [-0.1741615421908499]])
 map1, map2 = cv2.fisheye.initUndistortRectifyMap(K, D, np.eye(3), K, DIM, cv2.CV_16SC2)
+"""
 
 #GORUNTU KAYIT
 fourcc = cv2.VideoWriter_fourcc(*'MP4V') # XVID algoritmasını tanımlama
@@ -47,7 +53,8 @@ class missions():
     def get_target_from_bearing(self,original_location, ang, dist, altitude=None):
 
         if altitude is None:
-            altitude = original_location.alt 
+            altitude = original_location.alt
+
         dNorth  = dist*math.cos(ang)
         dEast   = dist*math.sin(ang)
         tgt= self.aurornis.get_location_metres(original_location, dNorth, dEast)
@@ -96,7 +103,7 @@ class missions():
 
             print("Anlik gidilen WP: {} Total WP: {} ".format(next_wp,self.aurornis.mission.count))
 
-            if (next_wp == 3): # Kamera hangi wp ye giderken acilacak onu belirler
+            if (next_wp > 2): # Kamera hangi wp ye giderken acilacak onu belirler
 
                 #print("New wp radius set to:"),aurornis.parameters['WP_RADIUS'] #PARAMETRE AYARLAMA
             
@@ -132,7 +139,7 @@ class missions():
                     peri = cv2.arcLength(contour, True)
                     approx = cv2.approxPolyDP(contour, 0.04 * peri, True)
                     
-                    if cv2.contourArea(contour) > 30 :# alan ... den buyukse and len(approx) >= 5
+                    if cv2.contourArea(contour) > 300 :# alan ... den buyukse and len(approx) >= 5
                         cv2.putText(blurred_frame, "Hedef Tespit Edildi!!!", (50,50), cv2.FONT_HERSHEY_SIMPLEX, 1, (255,0,0), 2, cv2.LINE_AA)     
                         c = max(contours, key = cv2.contourArea) #max contour
                         M = cv2.moments(c)
@@ -155,9 +162,9 @@ class missions():
                         for i in range(0, len(hedef_gps)):
                             hedef_gps[i] = float(hedef_gps[i])  #hedef gps = enlem,boylam,yukseklik seklinde geliyor!
 
-                        kordinatlar_alindi_mi = True 
-                        
-                        
+                        kordinatlar_alindi_mi = True  #GPS HESAPLADIKTAN SONRA TRUE OLUR VE KAMERA KAPANIP WP GOREVE EKLENIR
+ 
+
                         if(cx >= 320-radius and cx <= 320+radius and cy >= 220-radius and cy <= 220+radius):
                             #Ekranın tam ortası servo kit komutları eklenicek ama bu suan calismaz cunku bu while gps hesapladiktan sonra bitiyor servo acmayi baska bir fonksiyonda hedefin wp'ine gelip gelmediginin kontrolunu yaparak actirabiliriz
                             print("Ekranın ortasında")
@@ -166,6 +173,7 @@ class missions():
                             #kit.servo[servonun pini].angle = 120 #dereceye gore servoyu hareket ettirir 
 
                 #SSH'da imshowlar KAPANACAK
+                
                 cv2.imshow("Mask", mask)
                 cv2.imshow("Frame", frame)
                 cv2.imshow("Goruntu Isleme",blurred_frame)
@@ -175,11 +183,12 @@ class missions():
 
                 if (cv2.waitKey(15) & 0xFF == ord('q') or kordinatlar_alindi_mi==True) :
                     
-                    #Elle WP ekliyoruz!!!
+                    #Elle Kordinat alip WP ekliyoruz!!!
                     
-                    self.aurornis.add_last_waypoint_to_mission(hedef_gps[0],hedef_gps[1],7)
-                    self.aurornis.add_last_waypoint_to_mission(37.07360000,37.27436160,15)
-                    
+                    self.aurornis.add_last_waypoint_to_mission(37.07360000,37.27436160,40)  #BURAYA MP DEN BELIRLEDIGINIZ KORDINATI YAZIN !!!
+                    self.aurornis.add_last_waypoint_to_mission(hedef_gps[0],hedef_gps[1],40) #enlem,boylam,yukseklik
+                    self.aurornis.add_last_waypoint_to_mission(37.07360000,37.27436160,40)  #BURAYA MP DEN BELIRLEDIGINIZ KORDINATI YAZIN !!!
+
                     print("Mode changing AUTO")
                     self.aurornis.set_ap_mode("AUTO")
                     break
