@@ -1,25 +1,26 @@
 from Aurornis import aurornis 
 import argparse
 import time
-#import keyboard
+import keyboard
 from Missions import missions
 
 
 parser = argparse.ArgumentParser()
-parser.add_argument('--connect' ,default='/dev/ttyUSB0,115200') #/dev/ttyUSB0,115200
-
+parser.add_argument('--connect', default='tcp:127.0.0.1:5762') #connection string USB olacak '/dev/ttyUSB0'
 args = parser.parse_args()
     
    
 connection_string = args.connect
-
+  
 #-- Create the object
 plane = aurornis(connection_string)
 mission = missions(plane)
 
+mission.uzerine_uc()
 
+"""
 while True:
-	secenek = input("\nLUTFEN SECINIZ\n1- Ucus oncesi kontrol\n2-Gorevler Listesi\n3-CIKIS \n----->")
+	secenek = input("\nLUTFEN SECINIZ\n1- Ucus oncesi kontrol\n2-Gorevi Baslat\n3-CIKIS \n----->")
 
 	if secenek == '1':
 		print("ARM KONTROL : {}".format(plane.is_armed()))
@@ -35,31 +36,23 @@ while True:
 		#print("Lidar uzakligi {}".format(plane.distance))
 		print("\n")
 		time.sleep(1)
-		#if keyboard.read_key() == "q":
-		#	break
+
 	
 	elif secenek == '2':
-		gorev_secenek = input("\n1- Hedef Takip\n2-Kordinat Bulma\n3-CIKIS \n ---->")
-	
-		if gorev_secenek == '1':
-			print("\n1. Gorev Baslatiliyor\n")
-	
-		if gorev_secenek == '2':
-			print("\n2. Gorev baslatiliyor\n")
-			n_WP,missionList = plane.get_current_mission()
-			#gorev classindan gorevi baslaticaz
-			print(n_WP)
-			time.sleep(2)
 
-		if not plane.is_armed():
-			plane.arm_and_takeoff()
+		print("\n2. Gorev baslatiliyor\n")
+		n_WP,missionList = plane.get_current_mission()
+		#gorev classindan gorevi baslaticaz
+		print(n_WP)
+		time.sleep(2)
 
+		#if not plane.is_armed():
+			#plane.arm_and_takeoff()  #ARM EDIP TAKE OFF KOMUTU VERIR
 
 		mission.uzerine_uc()
+		break
 
-					
-		if gorev_secenek == '3':
-			break
+
 	elif secenek == '3':
 		break 
-		
+		"""

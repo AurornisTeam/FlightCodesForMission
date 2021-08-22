@@ -9,7 +9,6 @@ class aurornis():
 		#connection string - mavproxy stili bağlanma şekli örneğin tcp:127.0.0.1:5760
 		#vehicle - dronekit arac tipi , default kullaniyoruz
 
-		print("sa")
 		if not vehicle is None:
 			self.vehicle = vehicle
 			print("Hazir arac kullaniliyor")
@@ -53,11 +52,13 @@ class aurornis():
 
 		self.distance = 0.0   #Lidar uzaklik
 
+		self.mission = self.vehicle.commands
+
 
 
 
 	def _connect(self, connection_string): #Private fonksiyon baska yere import edilemez
-		self.vehicle = connect(connection_string , wait_ready = False, heartbeat_timeout = 360)
+		self.vehicle = connect(connection_string , wait_ready = True, heartbeat_timeout = 360)
 
 
 	def _setup_listeners(self): #private fonksiyon
@@ -249,7 +250,7 @@ class aurornis():
 				print ("Altitude = %.0f"%self.pos_alt_rel)
 				time.sleep(2.0)
                 
-            #print("Altitude reached: set to GUIDED")
+			print("Altitude reached: set to GUIDED")
             #self.set_ap_mode("GUIDED")
             
 			time.sleep(1.0)
@@ -281,3 +282,36 @@ class aurornis():
 	def goto(self, location):
 
 		self.vehicle.simple_goto(location)
+
+
+
+	def add_last_waypoint_to_mission(                                       #--- Adds a last waypoint on the current mission file
+            self,            #--- vehicle object
+            wp_Last_Latitude,   #--- [deg]  Target Latitude
+            wp_Last_Longitude,  #--- [deg]  Target Longitude
+            wp_Last_Altitude):  #--- [m]    Target Altitude
+       
+        # Get the set of commands from the vehicle
+            cmds = self.vehicle.commands
+            cmds.download()
+            cmds.wait_ready()
+
+            # Save the vehicle commands to a list
+            missionlist=[]
+            for cmd in cmds:
+                missionlist.append(cmd)
+
+        # Modify the mission as needed. For example, here we change the
+            wpLastObject = Command( 0, 0, 0, mavutil.mavlink.MAV_FRAME_GLOBAL_RELATIVE_ALT, mavutil.mavlink.MAV_CMD_NAV_WAYPOINT, 0, 0, 0, 0, 0, 0, 
+                               wp_Last_Latitude, wp_Last_Longitude, wp_Last_Altitude)
+            missionlist.append(wpLastObject)
+
+        # Clear the current mission (command is sent when we call upload())
+            cmds.clear()
+
+        #Write the modified mission and flush to the vehicle
+            for cmd in missionlist:
+                cmds.add(cmd)
+            cmds.upload()
+        
+            return (cmds.count)
