@@ -2,7 +2,7 @@
 Kirmiziyi gordugu an gpsini kaydediyor , kordinatlar_alindi_mi True oldugu zaman kamerayı kapatıp kordinatları goreve ekliyor  
 
 """
-
+from dronekit import LocationGlobalRelative
 from Aurornis import aurornis
 from pymavlink import mavutil
 from scipy.spatial import distance as dist
@@ -25,7 +25,8 @@ flip=2
 
 camSet='nvarguscamerasrc !  video/x-raw(memory:NVMM), width= 640 , height= 480 , format=NV12, framerate=20/1 ! nvvidconv flip-method='+str(flip)+' ! video/x-raw, width='+str(dispW)+', height='+str(dispH)+', format=BGRx ! videoconvert ! video/x-raw, format=BGR ! appsink'
 
-cap = cv2.VideoCapture(camSet) # SJCAM Kamerada 0 degil 1 olabilir deneyin
+ # SJCAM Kamerada 0 degil 1 olabilir deneyin
+
 
 #KAMERA KALIBRASYONU
 """
@@ -48,6 +49,7 @@ class missions():
     
     def __init__(self,aurornis):
         self.aurornis = aurornis
+        self.nextwaypoint = self.aurornis.vehicle.commands.next
 
 
     def get_target_from_bearing(self,original_location, ang, dist, altitude=None):
@@ -96,6 +98,7 @@ class missions():
 
     def uzerine_uc(self):
 
+        cap = cv2.VideoCapture(0)
 
         while True:
 
@@ -107,9 +110,7 @@ class missions():
 
                 #print("New wp radius set to:"),aurornis.parameters['WP_RADIUS'] #PARAMETRE AYARLAMA
             
-
                 kordinatlar_alindi_mi=False
-
 
                 ret, frame = cap.read()
                 #h,w = frame.shape[:2]
@@ -185,7 +186,7 @@ class missions():
                     
                     #Elle Kordinat alip WP ekliyoruz!!!
                     
-                    self.aurornis.add_last_waypoint_to_mission(37.07360000,37.27436160,40)  #BURAYA MP DEN BELIRLEDIGINIZ KORDINATI YAZIN !!!
+                    self.aurornis.add_last_waypoint_to_mission(-35.3642059,149.1632652,40)  #BURAYA MP DEN BELIRLEDIGINIZ KORDINATI YAZIN !!!
                     self.aurornis.add_last_waypoint_to_mission(hedef_gps[0],hedef_gps[1],40) #enlem,boylam,yukseklik
                     self.aurornis.add_last_waypoint_to_mission(37.07360000,37.27436160,40)  #BURAYA MP DEN BELIRLEDIGINIZ KORDINATI YAZIN !!!
 
@@ -196,3 +197,48 @@ class missions():
         cap.release()
         cv2.destroyAllWindows()
 
+    def distance_to_current_waypoint(self):
+        """
+        Bir sonraki waypointe uzakligi metre cinsinden verir
+        ilk waypoint yani home location icin "none" doner!!
+        """
+        nextwaypoint = self.aurornis.vehicle.commands.next
+        if nextwaypoint==0:
+            return None
+        missionitem=self.aurornis.vehicle.commands[nextwaypoint-1] #commands are zero indexed
+        lat = missionitem.x
+        lon = missionitem.y
+        alt = missionitem.z
+        targetWaypointLocation = LocationGlobalRelative(lat,lon,alt)
+        distancetopoint = self.get_distance_metres(self.aurornis.vehicle.location.global_relative_frame, targetWaypointLocation)
+        return distancetopoint
+
+    def get_distance_metres(self,aLocation1, aLocation2):
+        """
+        Returns the ground distance in metres between two LocationGlobal objects.
+
+        This method is an approximation, and will not be accurate over large distances and close to the 
+        earth's poles. It comes from the ArduPilot test code: 
+        https://github.com/diydrones/ardupilot/blob/master/Tools/autotest/common.py
+        """
+
+        dlat = aLocation2.lat - aLocation1.lat
+        dlong = aLocation2.lon - aLocation1.lon
+        return math.sqrt((dlat*dlat) + (dlong*dlong)) * 1.113195e5
+
+    def yuk_birak(self):
+
+        while True:
+            nextwaypoint = self.aurornis.vehicle.commands.next
+            uzaklik = self.distance_to_current_waypoint() 
+
+            if nextwaypoint ==3 and uzaklik < 200:
+                print("Birinci servo acilir ve yuk birakilir")
+                
+
+            elif nextwaypoint == 5 and uzaklik < 300:
+                print("Ikinci servo acilir ve yuk birakilir")
+                break
+
+            else:
+                print("Next wp :{} Uzaklik: {}".format(nextwaypoint,uzaklik))
