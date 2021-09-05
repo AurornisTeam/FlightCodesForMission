@@ -16,7 +16,7 @@ import numpy as np
 import psutil
 import argparse
 import copy
-
+import RPi.GPIO as GPIO
 import cv2
 
 dispW=640
@@ -185,11 +185,22 @@ class missions():
                 if (cv2.waitKey(15) & 0xFF == ord('q') or kordinatlar_alindi_mi==True) :
                     
                     #Elle Kordinat alip WP ekliyoruz!!!
-                    
+                    self.aurornis.add_last_waypoint_to_mission(37.07360000,37.27436160,40)
+                    self.aurornis.add_last_waypoint_to_mission(37.07360000,37.27436160,40)
                     self.aurornis.add_last_waypoint_to_mission(-35.3642059,149.1632652,40)  #BURAYA MP DEN BELIRLEDIGINIZ KORDINATI YAZIN !!!
                     self.aurornis.add_last_waypoint_to_mission(hedef_gps[0],hedef_gps[1],40) #enlem,boylam,yukseklik
                     self.aurornis.add_last_waypoint_to_mission(37.07360000,37.27436160,40)  #BURAYA MP DEN BELIRLEDIGINIZ KORDINATI YAZIN !!!
-
+                    self.aurornis.add_last_waypoint_to_mission(37.07360000,37.27436160,40)
+                    self.aurornis.add_last_waypoint_to_mission(37.07360000,37.27436160,40)
+                    
+                    self.aurornis.add_last_waypoint_to_mission(37.07360000,37.27436160,40)
+                    self.aurornis.add_last_waypoint_to_mission(37.07360000,37.27436160,40)
+                    self.aurornis.add_last_waypoint_to_mission(-35.3642059,149.1632652,40)  #BURAYA MP DEN BELIRLEDIGINIZ KORDINATI YAZIN !!!
+                    self.aurornis.add_last_waypoint_to_mission(hedef_gps[0],hedef_gps[1],40) #enlem,boylam,yukseklik
+                    self.aurornis.add_last_waypoint_to_mission(37.07360000,37.27436160,40) 
+                    self.aurornis.add_last_waypoint_to_mission(37.07360000,37.27436160,40) 
+                    self.aurornis.add_last_waypoint_to_mission(37.07360000,37.27436160,40)
+                    
                     print("Mode changing AUTO")
                     self.aurornis.set_ap_mode("AUTO")
                     break
@@ -234,10 +245,32 @@ class missions():
 
             if nextwaypoint ==3 and uzaklik < 200:
                 print("Birinci servo acilir ve yuk birakilir")
-                
+                servo1 = 17
+                GPIO.setmode(GPIO.BCM)
+                GPIO.setup(servo1, GPIO.OUT)
+
+                p1 = GPIO.PWM(servo1, 50) # GPIO 17 for PWM with 50Hz
+                p1.start(2.5) # Initialization
+                p1.ChangeDutyCycle(2.5)
+                time.sleep(0.5)
+                p1.ChangeDutyCycle(12)
+                p1.stop()
+                GPIO.cleanup()
+                GPIO.setwarnings(False)
 
             elif nextwaypoint == 5 and uzaklik < 300:
                 print("Ikinci servo acilir ve yuk birakilir")
+                servo2 = 27
+                GPIO.setmode(GPIO.BCM)
+                GPIO.setup(servo2, GPIO.OUT)
+
+                p2 = GPIO.PWM(servo2, 50) # GPIO 17 for PWM with 50Hz
+                p2.start(2.5) # Initialization
+                p2.ChangeDutyCycle(2.5)
+                time.sleep(0.5)
+                p2.ChangeDutyCycle(12)
+                p2.stop()
+                GPIO.cleanup()
                 break
 
             else:
