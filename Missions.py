@@ -245,7 +245,7 @@ class missions():
             nextwaypoint = self.aurornis.vehicle.commands.next
             uzaklik = self.distance_to_current_waypoint() 
 
-            if nextwaypoint ==11 and uzaklik < 22:
+            if nextwaypoint ==11 and uzaklik < 14:
                 print("Birinci servo acilir ve yuk birakilir")
                 servo1 = 17
                 GPIO.setmode(GPIO.BCM)
@@ -260,7 +260,7 @@ class missions():
                 GPIO.cleanup()
                 GPIO.setwarnings(False)
 
-            elif nextwaypoint == 18 and uzaklik < 22:
+            elif nextwaypoint == 18 and uzaklik < 14:
                 print("Ikinci servo acilir ve yuk birakilir")
                 servo2 = 27
                 GPIO.setmode(GPIO.BCM)
