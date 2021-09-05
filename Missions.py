@@ -201,7 +201,7 @@ class missions():
                     self.aurornis.add_last_waypoint_to_mission(39.7031359,32.7566814,20) 
                     self.aurornis.add_last_waypoint_to_mission(39.7027748,32.7566680,20)
                     
-                    self.aurornis.add_last_waypoint_to_mission(39.7026159,32.7568880,10)
+                    self.aurornis.add_last_waypoint_to_mission(39.7022795,32.7573600,10)
                     
                     print("Mode changing AUTO")
                     self.aurornis.set_ap_mode("AUTO")
