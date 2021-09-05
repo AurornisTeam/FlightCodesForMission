@@ -58,7 +58,7 @@ class aurornis():
 
 
 	def _connect(self, connection_string): #Private fonksiyon baska yere import edilemez
-		self.vehicle = connect(connection_string , wait_ready = True, heartbeat_timeout = 360)
+		self.vehicle = connect(connection_string , wait_ready = False, heartbeat_timeout = 360)
 
 
 	def _setup_listeners(self): #private fonksiyon
