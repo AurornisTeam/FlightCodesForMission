@@ -121,14 +121,14 @@ class missions():
                 blurred_frame = cv2.GaussianBlur(frame, (5, 5), 0)
 
                 hsv = cv2.cvtColor(blurred_frame, cv2.COLOR_BGR2HSV)
-                lower_red = np.array([0, 120, 70])
-                upper_red = np.array([10, 255, 255])
+                lower_red = np.array([100, 150, 0])
+                upper_red = np.array([140, 255, 255])
                 mask1 = cv2.inRange(hsv, lower_red, upper_red)
-                lower_red = np.array([170, 120, 70])
-                upper_red = np.array([180, 255, 255])
-                mask2 = cv2.inRange(hsv, lower_red, upper_red)
+                #lower_red = np.array([170, 120, 70])
+                #upper_red = np.array([180, 255, 255])
+                #mask2 = cv2.inRange(hsv, lower_red, upper_red)
 
-                mask = mask1 + mask2
+                mask = mask1 #+ mask2
 
                 contours, _ = cv2.findContours(mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_NONE)
 
@@ -184,22 +184,28 @@ class missions():
 
                 if (cv2.waitKey(15) & 0xFF == ord('q') or kordinatlar_alindi_mi==True) :
                     
+                  
+                    self.aurornis.add_last_waypoint_to_mission(40.0314612,32.6894841,30)  #BURAYA MP DEN BELIRLEDIGINIZ KORDINATI YAZIN !!!
+                     #enlem,boylam,yukseklik
+                    self.aurornis.add_last_waypoint_to_mission(40.0314489,32.6884916,30)  #BURAYA MP DEN BELIRLEDIGINIZ KORDINATI YAZIN !!!
+                    self.aurornis.add_last_waypoint_to_mission(40.0316810,32.6881751,30)
+                    self.aurornis.add_last_waypoint_to_mission(40.0319110,32.6884809,30)
                     #Elle Kordinat alip WP ekliyoruz!!!
-                    self.aurornis.add_last_waypoint_to_mission(39.7022837,32.7573600,20)
-                    self.aurornis.add_last_waypoint_to_mission(39.7021949,32.7578187,20)
-                    self.aurornis.add_last_waypoint_to_mission(39.7025581,32.7578294,20)  #BURAYA MP DEN BELIRLEDIGINIZ KORDINATI YAZIN !!!
-                    self.aurornis.add_last_waypoint_to_mission(hedef_gps[0],hedef_gps[1],10) #enlem,boylam,yukseklik
-                    self.aurornis.add_last_waypoint_to_mission(39.7030678,32.7571589,20)  #BURAYA MP DEN BELIRLEDIGINIZ KORDINATI YAZIN !!!
-                    self.aurornis.add_last_waypoint_to_mission(39.7031359,32.7566814,20)
-                    self.aurornis.add_last_waypoint_to_mission(39.7027748,32.7566680,20)
+                    self.aurornis.add_last_waypoint_to_mission(40.0319171,32.6894411,30)
+                    self.aurornis.add_last_waypoint_to_mission(40.0317077,32.6898462,30)
+                    self.aurornis.add_last_waypoint_to_mission(40.0314612,32.6894841,30)  #BURAYA MP DEN BELIRLEDIGINIZ KORDINATI YAZIN !!!
+                    self.aurornis.add_last_waypoint_to_mission(hedef_gps[0],hedef_gps[1],20) #enlem,boylam,yukseklik
+                    self.aurornis.add_last_waypoint_to_mission(40.0314489,32.6884916,30)  #BURAYA MP DEN BELIRLEDIGINIZ KORDINATI YAZIN !!!
+                    self.aurornis.add_last_waypoint_to_mission(40.0316810,32.6881751,30)
+                    self.aurornis.add_last_waypoint_to_mission(40.0319110,32.6884809,30)
                     
-                    self.aurornis.add_last_waypoint_to_mission(39.7022837,32.7573600,20)
-                    self.aurornis.add_last_waypoint_to_mission(39.7021949,32.7578187,20)
-                    self.aurornis.add_last_waypoint_to_mission(39.7025581,32.7578294,20)  #BURAYA MP DEN BELIRLEDIGINIZ KORDINATI YAZIN !!!
-                    self.aurornis.add_last_waypoint_to_mission(hedef_gps[0],hedef_gps[1],10) #enlem,boylam,yukseklik
-                    self.aurornis.add_last_waypoint_to_mission(39.7030678,32.7571589,20) 
-                    self.aurornis.add_last_waypoint_to_mission(39.7031359,32.7566814,20) 
-                    self.aurornis.add_last_waypoint_to_mission(39.7027748,32.7566680,20)
+                    self.aurornis.add_last_waypoint_to_mission(40.0319171,32.6894411,30)
+                    self.aurornis.add_last_waypoint_to_mission(40.0317077,32.6898462,30)
+                    self.aurornis.add_last_waypoint_to_mission(40.0314612,32.6894841,30)  #BURAYA MP DEN BELIRLEDIGINIZ KORDINATI YAZIN !!!
+                    self.aurornis.add_last_waypoint_to_mission(hedef_gps[0],hedef_gps[1],20) #enlem,boylam,yukseklik
+                    self.aurornis.add_last_waypoint_to_mission(40.0314489,32.6884916,30)  #BURAYA MP DEN BELIRLEDIGINIZ KORDINATI YAZIN !!!
+                    self.aurornis.add_last_waypoint_to_mission(40.0316810,32.6881751,30)
+                    self.aurornis.add_last_waypoint_to_mission(40.0319110,32.6884809,30)
                     
                     self.aurornis.add_last_waypoint_to_mission(39.7022795,32.7573600,10)
                     
