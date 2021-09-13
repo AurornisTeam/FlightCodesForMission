@@ -124,11 +124,11 @@ class missions():
                 lower_red = np.array([100, 150, 0])
                 upper_red = np.array([140, 255, 255])
                 mask1 = cv2.inRange(hsv, lower_red, upper_red)
-                #lower_red = np.array([170, 120, 70])
-                #upper_red = np.array([180, 255, 255])
-                #mask2 = cv2.inRange(hsv, lower_red, upper_red)
+                lower_red = np.array([170, 120, 70])
+                upper_red = np.array([180, 255, 255])
+                mask2 = cv2.inRange(hsv, lower_red, upper_red)
 
-                mask = mask1 #+ mask2
+                mask = mask1 + mask2
 
                 contours, _ = cv2.findContours(mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_NONE)
 
