@@ -179,7 +179,7 @@ class missions():
                             aci=math.atan((320-cx)/(cy-220))
                             self.set_ground_course(180+math.degrees(aci),15)
 
-                        if(cx >= 320-radius and cx <= 320+radius and cy >= 220-radius and cy <= 220+radius):
+                        else(cx >= 320-radius and cx <= 320+radius and cy >= 220-radius and cy <= 220+radius):
                             print("Hedef Tam Ortada!!!")
 
                 #SSH'da imshowlar KAPANACAK
