@@ -16,7 +16,7 @@ import numpy as np
 import psutil
 import argparse
 import copy
-import RPi.GPIO as GPIO
+
 import cv2
 
 dispW=640
@@ -96,7 +96,7 @@ class missions():
         return gelen_target
 
 
-    def uzerine_uc(self):
+    def Gps_hesapla_uzerine_uc(self):
 
         cap = cv2.VideoCapture(0)
 
@@ -106,7 +106,7 @@ class missions():
 
             print("Anlik gidilen WP: {} Total WP: {} ".format(next_wp,self.aurornis.mission.count))
 
-            if (next_wp > 2): # Kamera hangi wp ye giderken acilacak onu belirler
+            if (True): # Kamera hangi wp ye giderken acilacak onu belirler
 
                 #print("New wp radius set to:"),aurornis.parameters['WP_RADIUS'] #PARAMETRE AYARLAMA
             
@@ -118,13 +118,15 @@ class missions():
                 #undistorted_frame = cv2.remap(frame, map1, map2, interpolation=cv2.INTER_LINEAR, borderMode=cv2.BORDER_CONSTANT)
 
 
-                blurred_frame = cv2.GaussianBlur(frame, (5, 5), 0)
+                blurred_frame = cv2.GaussianBlur(frame, (15, 15), 0)
 
-                hsv = cv2.cvtColor(blurred_frame, cv2.COLOR_BGR2HSV)
-                lower_red = np.array([100, 150, 0])
-                upper_red = np.array([140, 255, 255])
+                salt_pepper = cv2.medianBlur(blurred_frame, 19) 
+
+                hsv = cv2.cvtColor(salt_pepper, cv2.COLOR_BGR2HSV)
+                lower_red = np.array([0, 100, 10])
+                upper_red = np.array([0, 255, 255])
                 mask1 = cv2.inRange(hsv, lower_red, upper_red)
-                lower_red = np.array([170, 120, 70])
+                lower_red = np.array([140, 100, 10])
                 upper_red = np.array([180, 255, 255])
                 mask2 = cv2.inRange(hsv, lower_red, upper_red)
 
@@ -132,16 +134,12 @@ class missions():
 
                 contours, _ = cv2.findContours(mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_NONE)
 
-                merkez_noktasi = cv2.circle(blurred_frame, (320,480), 7, (0, 0, 255), -1)
-                cv2.putText(blurred_frame, "MERKEZ",(320,480),cv2.FONT_HERSHEY_SIMPLEX,0.5,(0,255,0),2) 
+                merkez_noktasi = cv2.circle(salt_pepper, (320,480), 7, (0, 0, 255), -1)
+                cv2.putText(salt_pepper, "MERKEZ",(320,480),cv2.FONT_HERSHEY_SIMPLEX,0.5,(0,255,0),2) 
                 
                 for contour in contours:
-                    
-                    peri = cv2.arcLength(contour, True)
-                    approx = cv2.approxPolyDP(contour, 0.04 * peri, True)
-                    
-                    if cv2.contourArea(contour) > 300 :# alan ... den buyukse and len(approx) >= 5
-                        cv2.putText(blurred_frame, "Hedef Tespit Edildi!!!", (50,50), cv2.FONT_HERSHEY_SIMPLEX, 1, (255,0,0), 2, cv2.LINE_AA)     
+                    if cv2.contourArea(contour) > 30 :# alan ... den buyukse and len(approx) >= 5
+                        cv2.putText(salt_pepper, "Hedef Tespit Edildi!!!", (50,50), cv2.FONT_HERSHEY_SIMPLEX, 1, (255,0,0), 2, cv2.LINE_AA)     
                         c = max(contours, key = cv2.contourArea) #max contour
                         M = cv2.moments(c)
                         cx = int(M['m10'] / M['m00'])
@@ -149,72 +147,57 @@ class missions():
                         (x, y), radius = cv2.minEnclosingCircle(contour)
                         center = (int(x), int(y))
                         radius = int(radius)
-                        cv2.circle(blurred_frame, center, radius, (0, 255, 0), 2)
-                        cv2.circle(blurred_frame, (cx, cy), 7, (255, 255, 255), -1)
-                        cv2.putText(blurred_frame, "Merkez "+str(cx)+","+str(cy), (cx - 20, cy - 20),   cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 1)
-                        cv2.line(blurred_frame,(cx,cy),(320,480),(255,0,0),1)
+                        cv2.circle(salt_pepper, center, radius, (0, 255, 0), 2)
+                        cv2.circle(salt_pepper, (cx, cy), 7, (255, 255, 255), -1)
+                        cv2.putText(salt_pepper, "Merkez "+str(cx)+","+str(cy), (cx - 20, cy - 20),   cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 1)
+                        cv2.line(salt_pepper,(cx,cy),(320,480),(255,0,0),1)
                         piksel_uzaklik = dist.euclidean((cx,cy), (320,480))
 
-                        aci=math.degrees(math.atan((cx-320)/(480-cy)))
-                        hedef_yaw=aci+(self.aurornis.att_heading_deg % 360)
+                        aci = math.atan(cx/cy) 
 
-                        hedef_gps = self.set_ground_course(hedef_yaw,self.aurornis.pos_alt_rel,piksel_uzaklik)
+                        self.set_ground_course(aci,15)
 
-                        for i in range(0, len(hedef_gps)):
-                            hedef_gps[i] = float(hedef_gps[i])  #hedef gps = enlem,boylam,yukseklik seklinde geliyor!
+                        if (next_wp == 4):
+                        	print("birinci servoyu ac")
+                            acti == True
+                        elif(next_wp == 6):
+                        	print("ikinci servoyu ac")
 
-                        kordinatlar_alindi_mi = True  #GPS HESAPLADIKTAN SONRA TRUE OLUR VE KAMERA KAPANIP WP GOREVE EKLENIR
- 
+                        if (cx >320 and cy < 220):
+                            aci=math.atan((cx-320)/(220-cy))
+                            self.set_ground_course(math.degrees(aci),15)
+
+                        elif(cx < 320 and cy<220 ):
+                            aci=math.atan((320-cx)/(220-cy))
+                            self.set_ground_course(360-math.degrees(aci),15)
+
+                        elif(cx > 320 and cy > 220 ):
+                            aci=math.atan((cx-320)/(cy-220))
+                            self.set_ground_course(180-math.degrees(aci),15)
+
+                        elif(cx < 320 and cy >220 ):
+                            aci=math.atan((320-cx)/(cy-220))
+                            self.set_ground_course(180+math.degrees(aci),15)
 
                         if(cx >= 320-radius and cx <= 320+radius and cy >= 220-radius and cy <= 220+radius):
-                            #Ekranın tam ortası servo kit komutları eklenicek ama bu suan calismaz cunku bu while gps hesapladiktan sonra bitiyor servo acmayi baska bir fonksiyonda hedefin wp'ine gelip gelmediginin kontrolunu yaparak actirabiliriz
-                            print("Ekranın ortasında")
-
-                            #kit.servo[servonun pini].angle = 180 #dereceye gore servoyu hareket ettirir 
-                            #kit.servo[servonun pini].angle = 120 #dereceye gore servoyu hareket ettirir 
+                            print("Hedef Tam Ortada!!!")
 
                 #SSH'da imshowlar KAPANACAK
                 
                 cv2.imshow("Mask", mask)
                 cv2.imshow("Frame", frame)
-                cv2.imshow("Goruntu Isleme",blurred_frame)
+                cv2.imshow("Goruntu Isleme",salt_pepper)
 
                 kayit_frame.write(frame)
-                kayit_goruntu_isleme.write(blurred_frame)
+                kayit_goruntu_isleme.write(salt_pepper)
 
-                if (cv2.waitKey(15) & 0xFF == ord('q') or kordinatlar_alindi_mi==True) :
+                if (cv2.waitKey(15) & 0xFF == ord('q') ) :
                     
-                  
-                    self.aurornis.add_last_waypoint_to_mission(40.0314612,32.6894841,30)  #BURAYA MP DEN BELIRLEDIGINIZ KORDINATI YAZIN !!!
-                     #enlem,boylam,yukseklik
-                    self.aurornis.add_last_waypoint_to_mission(40.0314489,32.6884916,30)  #BURAYA MP DEN BELIRLEDIGINIZ KORDINATI YAZIN !!!
-                    self.aurornis.add_last_waypoint_to_mission(40.0316810,32.6881751,30)
-                    self.aurornis.add_last_waypoint_to_mission(40.0319110,32.6884809,30)
-                    #Elle Kordinat alip WP ekliyoruz!!!
-                    self.aurornis.add_last_waypoint_to_mission(40.0319171,32.6894411,30)
-                    self.aurornis.add_last_waypoint_to_mission(40.0317077,32.6898462,30)
-                    self.aurornis.add_last_waypoint_to_mission(40.0314612,32.6894841,30)  #BURAYA MP DEN BELIRLEDIGINIZ KORDINATI YAZIN !!!
-                    self.aurornis.add_last_waypoint_to_mission(hedef_gps[0],hedef_gps[1],20) #enlem,boylam,yukseklik
-                    self.aurornis.add_last_waypoint_to_mission(40.0314489,32.6884916,30)  #BURAYA MP DEN BELIRLEDIGINIZ KORDINATI YAZIN !!!
-                    self.aurornis.add_last_waypoint_to_mission(40.0316810,32.6881751,30)
-                    self.aurornis.add_last_waypoint_to_mission(40.0319110,32.6884809,30)
-                    
-                    self.aurornis.add_last_waypoint_to_mission(40.0319171,32.6894411,30)
-                    self.aurornis.add_last_waypoint_to_mission(40.0317077,32.6898462,30)
-                    self.aurornis.add_last_waypoint_to_mission(40.0314612,32.6894841,30)  #BURAYA MP DEN BELIRLEDIGINIZ KORDINATI YAZIN !!!
-                    self.aurornis.add_last_waypoint_to_mission(hedef_gps[0],hedef_gps[1],20) #enlem,boylam,yukseklik
-                    self.aurornis.add_last_waypoint_to_mission(40.0314489,32.6884916,30)  #BURAYA MP DEN BELIRLEDIGINIZ KORDINATI YAZIN !!!
-                    self.aurornis.add_last_waypoint_to_mission(40.0316810,32.6881751,30)
-                    self.aurornis.add_last_waypoint_to_mission(40.0319110,32.6884809,30)
-                    
-                    self.aurornis.add_last_waypoint_to_mission(39.7022795,32.7573600,10)
-                    
-                    print("Mode changing AUTO")
-                    self.aurornis.set_ap_mode("AUTO")
                     break
 
         cap.release()
         cv2.destroyAllWindows()
+
 
     def distance_to_current_waypoint(self):
         """
@@ -251,34 +234,12 @@ class missions():
             nextwaypoint = self.aurornis.vehicle.commands.next
             uzaklik = self.distance_to_current_waypoint() 
 
-            if nextwaypoint ==11 and uzaklik < 14:
+            if nextwaypoint ==5 and uzaklik < 100:
                 print("Birinci servo acilir ve yuk birakilir")
-                servo1 = 17
-                GPIO.setmode(GPIO.BCM)
-                GPIO.setup(servo1, GPIO.OUT)
+                
 
-                p1 = GPIO.PWM(servo1, 50) # GPIO 17 for PWM with 50Hz
-                p1.start(2.5) # Initialization
-                p1.ChangeDutyCycle(2.5)
-                time.sleep(0.5)
-                p1.ChangeDutyCycle(12)
-                p1.stop()
-                GPIO.cleanup()
-                GPIO.setwarnings(False)
-
-            elif nextwaypoint == 18 and uzaklik < 14:
+            elif nextwaypoint == 8 and uzaklik < 200:
                 print("Ikinci servo acilir ve yuk birakilir")
-                servo2 = 27
-                GPIO.setmode(GPIO.BCM)
-                GPIO.setup(servo2, GPIO.OUT)
-
-                p2 = GPIO.PWM(servo2, 50) # GPIO 17 for PWM with 50Hz
-                p2.start(2.5) # Initialization
-                p2.ChangeDutyCycle(2.5)
-                time.sleep(0.5)
-                p2.ChangeDutyCycle(12)
-                p2.stop()
-                GPIO.cleanup()
                 break
 
             else:
