@@ -81,7 +81,7 @@ def goruntu ():
 
 goruntu()
 print("Servo 1 aç!!!!!")
-#s1.ChangeDutyCycle(aci) #aci=2 -> 0 derece , aci=12 -> 180 dereceymis denersiniz
+#s1.ChangeDutyCycle(aci) #aci=2 -> 0 derece , aci=12 -> 180 derece
 time.sleep(3)
 
 goruntu()
